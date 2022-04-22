@@ -1,14 +1,22 @@
-import React,{useMemo, useState} from 'react';
-import { useWeb3 } from '../web3/Web3';
+import React,{useEffect, useMemo, useState} from 'react';
+import { useWeb3, useGetTasks } from '../web3/Web3';
+import { Tasks } from '../Tasks/Tasks';
 
 export const Home = () => {
     const { web3, accounts, contract } = useWeb3();
+    // console.log(useGetTasks());
+    const {allTasks,getTasks} = useGetTasks();
     const {Todo} = contract;
-    // console.log(Todo);
     const [formInput, setFormInput] = useState({
         title: "",
-        body: ""
+        body: "",
+        completed: false,
+        edit:false
     });
+
+    // useEffect(() => {
+    //     getTasks();
+    // },[])
 
     const handleChange = (e) => {
         setFormInput({
@@ -18,7 +26,29 @@ export const Home = () => {
     }
 
     const addTask = async() => {
-        await Todo.methods.createTask(formInput.title, formInput.body).send({from: accounts[0]});
+        const { events } = await Todo.methods.createTask(formInput.title, formInput.body).send({ from: accounts[0] });
+        if (events["TaskCreation"]["returnValues"]["success"]) {
+            setFormInput({...formInput,
+                title: "",
+                body: ""
+            });
+            getTasks(Todo);
+        }
+        else {
+            alert("Task Creation Failed");
+        }
+        console.log(events);
+    }
+
+    const editTask = async () => {
+        const { events } = await Todo.methods.editTask(formInput.id,formInput.title, formInput.body,formInput.completed).send({ from: accounts[0] });
+        setFormInput({
+            title: "",
+            body: "",
+            completed: false,
+            edit: false
+        })
+        getTasks(Todo);
     }
 
     return (
@@ -29,6 +59,7 @@ export const Home = () => {
                     <h5 className='mx-2'>{Todo["_address"]}</h5>
                 </div>
             }
+        <div className='d-flex flex-column align-items-center'>
         <div className='w-50 d-flex flex-column justify-content-center border rounded p-3 my-5' style={{ margin: "0 auto" }}>
                 <div className='mt-2'>
                     <label>Title</label>
@@ -52,7 +83,9 @@ export const Home = () => {
                         value={formInput.body}
                     />
                 </div>
-                {Todo && <button className='btn btn-success align-self-center mt-4' onClick={addTask}>Add Task</button>}
+                    {Todo && <button className='btn btn-success align-self-center mt-4' onClick={formInput["edit"]?editTask:addTask}>{formInput["edit"]?"Save change":"Add task"}</button>}
+            </div>
+                <Tasks setFormInput={setFormInput} Todo={Todo} accounts={accounts}/>
             </div>
         </div>
   )
