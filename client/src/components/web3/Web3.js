@@ -28,7 +28,8 @@ export const Web3 = ({ children }) => {
             for (let i = 0; i <= taskCountResponse; i++) {
                 const task = await contract.methods.tasks(i).call();
                 newTasks.push(task);
-            }
+        }
+        console.log(newTasks);
             setAllTasks(newTasks);
     }
 

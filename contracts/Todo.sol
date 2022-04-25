@@ -24,10 +24,10 @@ contract Todo{
     mapping(uint=> Task) public tasks;
 
     function createTask(string memory title, string memory body) public returns(bool){
+        taskCount++;
         tasks[taskCount]=Task(taskCount,title,body,false);
         tasksArray.push(tasks[taskCount]);
         emit TaskCreation(true,tasks[taskCount]);
-        taskCount++;
         return true;
     }
 
@@ -39,10 +39,10 @@ contract Todo{
 
     function deleteTask(uint id) public returns(bool){
         delete tasks[id];
+        taskCount--;
         for(uint i=id;i<=taskCount;i++){
             tasks[id]=tasks[id+1];
         }
-        taskCount--;
         return true;
     }
 

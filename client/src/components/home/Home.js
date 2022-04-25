@@ -6,7 +6,8 @@ export const Home = () => {
     const { web3, accounts, contract } = useWeb3();
     // console.log(useGetTasks());
     const {allTasks,getTasks} = useGetTasks();
-    const {Todo} = contract;
+    const { Todo } = contract;
+    
     const [formInput, setFormInput] = useState({
         title: "",
         body: "",
@@ -19,10 +20,15 @@ export const Home = () => {
     // },[])
 
     const handleChange = (e) => {
-        setFormInput({
-            ...formInput,
-            [e.target.name]: e.target.value
-        });
+        if (e.target.type ==="checkbox") { 
+            setFormInput({...formInput, [e.target.name]: e.target.checked});
+        }
+        else {
+            setFormInput({
+                ...formInput,
+                [e.target.name]: e.target.value
+            });
+        }
     }
 
     const addTask = async() => {
@@ -82,7 +88,17 @@ export const Home = () => {
                         onChange={handleChange}
                         value={formInput.body}
                     />
-                </div>
+                    </div>
+                    <div className='mt-2 d-flex align-items-center'>
+                        <label>Completed:</label>
+                        <input
+                            type="checkbox"
+                            checked={formInput.completed}
+                            onChange={handleChange}
+                            name="completed"
+                            className='mx-3'
+                        />
+                    </div>
                     {Todo && <button className='btn btn-success align-self-center mt-4' onClick={formInput["edit"]?editTask:addTask}>{formInput["edit"]?"Save change":"Add task"}</button>}
             </div>
                 <Tasks setFormInput={setFormInput} Todo={Todo} accounts={accounts}/>
